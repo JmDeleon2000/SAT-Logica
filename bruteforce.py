@@ -1,44 +1,42 @@
 
 expresion = [['!p'],['p', 'q'], ['p' , '!q', '!x', '!z'], ['p']]
-tested_info = {}
+vars = []
 
 
 
-def bruteforceSAT(exp, k = 0):
-    global tested_info
-    if (len(expresion) == 0):
-        return True
-    if len(tested_info) == 0:
-        access = 0
-        for i in range(len(expresion)):
-                for j in range(len(expresion[i])):
-                    var = expresion[i][j]
+def bruteforceSAT(exp):
+    #función wrapper para le recursiva
+    global vars
+    if (len(exp) == 0):
+        # caso trivial
+        return [True, exp]
+    if len(vars) == 0:
+        # hacer setup para la recursión en base a las variables presentes
+        for i in range(len(exp)):
+                for j in range(len(exp[i])):
+                    var = exp[i][j]
                     if var[0] == '!':
                         var = var[1:]
-                    exp[i][j] = [expresion[i][j], True]
-                    if not(var in tested_info.keys()):
-                        tested_info[var] = access
-                        access += 1
-        print(tested_info)
-    if k == len(tested_info.keys()):
-        print(exp)
+                    exp[i][j] = [exp[i][j], True]
+                    if not(var in vars):
+                        vars.append(var)
+    
+    def internal_brute_force(exp, k):
+        #subfunción recursiva
+        if k == len(vars):
+            #print(exp)
         
-        for disjunction in expresion:
-            test = False
-            for var in disjunction:
-                if var[1]:
-                    test = var
-            if not(test):
-                return False
-        return True
-    for var in tested_info.keys():
-        if tested_info[var] != k:
-            continue
-        tested_info[var] = k
-        #if var:
-        #    print(var)
-        #    print(k)
-
+            for disjunction in exp:
+                test = False
+                for var in disjunction:
+                    if var[1]:
+                        test = var
+                if not(test):
+                    return [False, []]
+            return [True, exp]
+        var = vars[k]
+        
+        #cambiar valor por verdadero
         for i in range(len(exp)):
             for j in range(len(exp[i])):
                 if var == exp[i][j][0]:
@@ -46,12 +44,12 @@ def bruteforceSAT(exp, k = 0):
                     
                 if var == exp[i][j][0][1:]:
                     exp[i][j][1] =  False
-
-
-        if bruteforceSAT(exp, k+1):
-            return True
-
-        for i in range(len(expresion)):
+        #probar con verdadero
+        t, r = internal_brute_force(exp, k+1)
+        if t:
+            return [True, r]
+        #cambiar valor a falso
+        for i in range(len(exp)):
             for j in range(len(exp[i])):
                     
                 if var == exp[i][j][0]:
@@ -59,10 +57,16 @@ def bruteforceSAT(exp, k = 0):
                     
                 if var == exp[i][j][0][1:]:
                     exp[i][j][1] =  True
-                   
+        #probar con falso
+        t, r = internal_brute_force(exp, k+1)
+        if t:
+            return [True, r]
+        return [False, []]
+    return internal_brute_force(exp, 0)
 
-        if bruteforceSAT(exp, k+1):
-            return True
-    return False
 
-print(bruteforceSAT(expresion))
+t, r = bruteforceSAT(expresion)
+print('Satisfactorio: ')
+print(t)
+print('Expresión: ')
+print(r)

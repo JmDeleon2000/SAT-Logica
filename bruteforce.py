@@ -1,5 +1,5 @@
 
-expresion = [['!p'],['p', 'q'], ['p' , '!q', '!x', '!z'], ['p']]
+expresion = [['!p', '!r', '!s'],['!q', '!p', '!s']]
 vars = []
 
 
@@ -9,7 +9,7 @@ def bruteforceSAT(exp):
     global vars
     if (len(exp) == 0):
         # caso trivial
-        return [True, exp]
+        return True, exp
     if len(vars) == 0:
         # hacer setup para la recursión en base a las variables presentes
         for i in range(len(exp)):
@@ -32,8 +32,8 @@ def bruteforceSAT(exp):
                     if var[1]:
                         test = var
                 if not(test):
-                    return [False, []]
-            return [True, exp]
+                    return False, []
+            return True, exp
         var = vars[k]
         
         #cambiar valor por verdadero
@@ -47,7 +47,7 @@ def bruteforceSAT(exp):
         #probar con verdadero
         t, r = internal_brute_force(exp, k+1)
         if t:
-            return [True, r]
+            return True, r
         #cambiar valor a falso
         for i in range(len(exp)):
             for j in range(len(exp[i])):
@@ -60,8 +60,8 @@ def bruteforceSAT(exp):
         #probar con falso
         t, r = internal_brute_force(exp, k+1)
         if t:
-            return [True, r]
-        return [False, []]
+            return True, r
+        return False, []
     return internal_brute_force(exp, 0)
 
 
